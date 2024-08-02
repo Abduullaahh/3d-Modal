@@ -1,4 +1,3 @@
-canvas{
-    height: 100vh !important;
-    size: 10000px;
+body{
+    background-color: white;
 }
