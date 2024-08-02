@@ -6,7 +6,6 @@ import './App.css'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Bot } from '../public/Bot'
-import Signin from './signin'
 
 function App() {
   const [count, setCount] = useState(0)
