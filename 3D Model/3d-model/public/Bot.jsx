@@ -7,8 +7,9 @@ export function Bot(props) {
   const { nodes, materials } = useGLTF('/bot.gltf');
   const botRef = useRef();
 
-  // State to track cursor position
+  // State to track cursor position and scroll position
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
 
   // Update cursor position on mouse move
   useEffect(() => {
@@ -25,6 +26,21 @@ export function Bot(props) {
     };
   }, []);
 
+  // Update scroll position on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPos({
+        x: window.scrollX / document.body.scrollWidth,  // Normalized horizontal scroll position
+        y: window.scrollY / document.body.scrollHeight, // Normalized vertical scroll position
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // Clamp rotation to a maximum angle
   const clampAngle = (angle, maxAngle) => {
     const maxRad = (maxAngle * Math.PI) / 180;
@@ -34,10 +50,10 @@ export function Bot(props) {
   useFrame(() => {
     if (botRef.current) {
       const botPosition = botRef.current.position;
-      
+
       // Create a vector for the cursor direction
       const cursorVector = new THREE.Vector3(-cursorPos.x, -cursorPos.y, -1).normalize();
-      
+
       // Adjust the movement factor
       const movementFactorX = cursorPos.x > -0.00000001 ? 0.3 : 1.5; // Reduce by half when moving right
       const movementFactorY = cursorPos.y > -0.00001 ? 0.2 : 1; // Reduce by half when moving top
@@ -45,6 +61,10 @@ export function Bot(props) {
       // Apply movement factors
       cursorVector.x *= movementFactorX;
       cursorVector.y *= movementFactorY;
+
+      // Adjust for scroll position
+      cursorVector.x += scrollPos.x;
+      cursorVector.y += scrollPos.y;
 
       // Calculate the rotation matrix
       const rotationMatrix = new THREE.Matrix4();
