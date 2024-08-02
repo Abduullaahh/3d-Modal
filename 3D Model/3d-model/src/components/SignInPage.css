@@ -16,10 +16,9 @@
   }
 
   canvas{
-      height: 100vh !important;
-      display: block;
-      width: 133px;
-      /* touch-action: auto; */
+    height: 100vh !important;
+    display: block;
+    width: 133px;
   }
 
   .container {

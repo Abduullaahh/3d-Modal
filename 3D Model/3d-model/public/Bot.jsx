@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 export function Bot(props) {
   const { nodes, materials } = useGLTF('/bot.gltf');
@@ -30,18 +31,26 @@ export function Bot(props) {
     return Math.max(-maxRad, Math.min(maxRad, angle));
   };
 
-  // Rotate bot to face cursor with angle limit
   useFrame(() => {
     if (botRef.current) {
-      const z = 1; // Assuming the bot faces the positive Z direction
+      const botPosition = botRef.current.position;
+      
+      // Create a vector for the cursor direction
+      const cursorVector = new THREE.Vector3(-cursorPos.x, -cursorPos.y, -1).normalize();
+      
+      // Adjust the movement factor
+      const movementFactorX = cursorPos.x > -0.00000001 ? 0.3 : 1.5; // Reduce by half when moving right
+      const movementFactorY = cursorPos.y > -0.00001 ? 0.2 : 1; // Reduce by half when moving top
 
-      // Calculate angles for X and Y rotations
-      const xAngle = Math.atan2(cursorPos.y, z);
-      const yAngle = Math.atan2(-cursorPos.x, z);
+      // Apply movement factors
+      cursorVector.x *= movementFactorX;
+      cursorVector.y *= movementFactorY;
 
-      // Clamp angles to a maximum of 60 degrees
-      botRef.current.rotation.x = clampAngle(-xAngle, 120);
-      botRef.current.rotation.y = clampAngle(-yAngle, 60);
+      // Calculate the rotation matrix
+      const rotationMatrix = new THREE.Matrix4();
+      rotationMatrix.lookAt(botPosition, cursorVector.add(botPosition), new THREE.Vector3(0, 1, 0));
+
+      botRef.current.rotation.setFromRotationMatrix(rotationMatrix);
     }
   });
 
